@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dijkstra · Korteste vej</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="dijkstra.js" defer></script>
+  <script src="playback.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">AP PORTFOLIO / GRAFER</p><h1>Dijkstra<span>.</span></h1></div>
+      <nav class="versions" aria-label="Version"><a href="index.html" aria-current="page">JavaScript</a><a href="java.html">Java + PriorityQueue</a></nav>
+    </header>
+
+    <section class="toolbar" aria-label="Indstillinger og afspilning">
+      <div class="route-inputs">
+        <label>Fra<select id="source" aria-label="Startby"></select></label>
+        <span class="route-arrow" aria-hidden="true">→</span>
+        <label>Til<select id="target" aria-label="Målby"></select></label>
+      </div>
+      <div class="playback">
+        <button id="reset" title="Tilbage til start">Nulstil</button>
+        <button id="back">← Tilbage</button>
+        <button id="next">Næste trin →</button>
+        <button id="play" class="primary">Afspil</button>
+        <label class="speed">Tempo<select id="speed"><option value="1800">Langsomt</option><option value="1000" selected>Normalt</option><option value="450">Hurtigt</option></select></label>
+        <label class="detail-toggle"><input id="show-all-steps" type="checkbox">Alle kode-trin</label>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="panel graph-panel" aria-labelledby="graph-title">
+        <div class="panel-heading"><h2 id="graph-title">Vejnettet</h2><span id="graph-summary">10 byer · 14 rettede veje · km</span></div>
+        <div class="graph-viewport" tabindex="0" role="region" aria-label="Vejnet; rul vandret på små skærme">
+        <svg id="graph" viewBox="0 0 920 620" role="img" aria-labelledby="svg-title svg-description">
+          <title id="svg-title">Rettet graf med byerne A til J</title>
+          <desc id="svg-description">Pilene viser tilladt kørselsretning. Tallene på vejene er afstande i kilometer. Aktuelle afstande og status findes også i tabellen.</desc>
+        </svg>
+        </div>
+        <div class="legend" aria-label="Farveforklaring">
+          <span><i class="dot unknown"></i>unknown</span><span><i class="dot discovered"></i>Kandidater</span>
+          <span><i class="dot active"></i>current</span><span><i class="dot visited"></i>visited</span>
+          <span><i class="dot route"></i>shortest path</span>
+        </div>
+        <div class="step-state" aria-live="polite" aria-atomic="true">
+          <span id="phase" class="phase"></span>
+          <span>current <strong id="current-node">—</strong></span>
+          <span>edge <strong id="current-edge">—</strong></span>
+          <p id="result" hidden></p>
+        </div>
+        <div class="timeline"><label for="timeline" id="step-count">Trin</label><input id="timeline" type="range" min="0" value="0" aria-label="Vælg trin"></div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel" aria-labelledby="distances-title">
+          <div class="panel-heading"><h2 id="distances-title">Node state</h2><span>source: <b id="source-label">A</b> · km</span></div>
+          <table><thead><tr><th scope="col">Node</th><th scope="col">Distance</th><th scope="col">Previous</th><th scope="col">Status</th></tr></thead><tbody id="distances"></tbody></table>
+        </section>
+        <section class="panel frontier-panel" aria-labelledby="frontier-title">
+          <div class="panel-heading"><h2 id="frontier-title">Kandidater</h2></div>
+          <ol id="frontier" class="frontier"></ol>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

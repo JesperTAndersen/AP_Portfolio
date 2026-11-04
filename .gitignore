@@ -1,0 +1,30 @@
+# Java / Maven
+target/
+build/
+out/
+*.class
+
+# JavaScript
+node_modules/
+dist/
+coverage/
+/visualiseringer/dijkstra/java-data.js
+
+# Editors
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Local configuration and logs
+/cheatsheets/
+.env
+.env.*
+!.env.example
+*.log
+
+# Operating systems
+.DS_Store
+Thumbs.db
+Desktop.ini
