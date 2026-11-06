@@ -1,10 +1,4 @@
 (() => {
-  if (!DijkstraDemo) {
-    document.getElementById('missing-data').hidden = false;
-    document.querySelector('.toolbar').hidden = true;
-    document.querySelector('.workspace').hidden = true;
-    return;
-  }
   const { nodes, edges, createSteps } = DijkstraDemo;
   const get = id => document.getElementById(id);
   const source = get('source');
@@ -56,6 +50,70 @@
     }
   }
 
+  // Linjerne fra Dijkstra.java. Hvert trin i visualiseringen markerer de linjer, der udføres.
+  const codeLines = [
+    { text: 'distances.put(source, 0);', phases: ['start'] },
+    { text: 'queue.add(new NodeWithDist(source, 0));', phases: ['start'] },
+    { text: 'while (!queue.isEmpty()) {', phases: ['settle'] },
+    { text: '    NodeWithDist current = queue.poll();', phases: ['select'] },
+    { text: '    if (visited.contains(current.node)) continue;', phases: [], javaOnly: 'kun i Java: forældet køelement' },
+    { text: '    visited.add(current.node);', phases: ['select'] },
+    { text: '    if (current.node.equals(destination)) break;', phases: ['complete'] },
+    { text: '    for (naboer til current) {', phases: ['inspect', 'keep', 'relax'] },
+    { text: '        int newDist = current.dist + weight;', phases: ['inspect', 'keep', 'relax'] },
+    { text: '        if (newDist < distances.getOrDefault(next, ∞)) {', phases: ['inspect', 'keep', 'relax'] },
+    { text: '            distances.put(next, newDist);', phases: ['relax'] },
+    { text: '            prev.put(next, current.node);', phases: ['relax'] },
+    { text: '            queue.add(new NodeWithDist(next, newDist));', phases: ['relax'] },
+    { text: '        }', phases: [] },
+    { text: '    }', phases: [] },
+    { text: '}', phases: [] },
+    { text: 'if (!visited.contains(destination)) → ingen vej', phases: ['unreachable'] },
+    { text: 'List<String> path = buildPath(prev, destination);', phases: ['complete'] }
+  ];
+  const codeElements = [];
+
+  function drawCode() {
+    for (const line of codeLines) {
+      const item = document.createElement('li');
+      const code = document.createElement('span');
+      code.textContent = line.text;
+      const note = document.createElement('span');
+      note.className = 'note';
+      if (line.javaOnly) { item.className = 'java-only'; note.textContent = `// ${line.javaOnly}`; }
+      item.append(code, note);
+      get('code').append(item);
+      codeElements.push({ item, note, line });
+    }
+  }
+
+  // Konkrete værdier ved den markerede linje, så koden kan læses sammen med grafen.
+  function codeNote(step, previousStep, text) {
+    const edge = step.edge && edges.find(e => e.id === step.edge);
+    if (step.phase === 'select' && text.includes('poll')) return `// → ${step.current}, ${step.distances[step.current]} km`;
+    if (step.phase === 'start' && text.includes('put')) return `// ${source.value} = 0`;
+    if (!edge) return '';
+    const candidate = step.distances[edge.from] + edge.weight;
+    if (text.includes('for (')) return `// ${edge.from} → ${edge.to}`;
+    if (text.includes('newDist =')) return `// ${step.distances[edge.from]} + ${edge.weight} = ${candidate}`;
+    // Ved relax er distances allerede opdateret, så sammenlign med værdien før.
+    const known = step.phase === 'relax' ? previousStep.distances[edge.to] : step.distances[edge.to];
+    if (text.includes('if (newDist')) return `// ${candidate} < ${format(known)}? ${candidate < known ? 'ja' : 'nej'}`;
+    if (text.includes('distances.put')) return `// ${edge.to}: ${format(known)} → ${candidate}`;
+    if (text.includes('prev.put')) return `// prev[${edge.to}] = ${edge.from}`;
+    return '';
+  }
+
+  function renderCode(step, previousStep) {
+    for (const { item, note, line } of codeElements) {
+      if (line.javaOnly) continue;
+      const current = line.phases.includes(step.phase);
+      item.classList.toggle('is-current', current);
+      note.textContent = current ? codeNote(step, previousStep, line.text) : '';
+    }
+    get('explanation').textContent = step.message;
+  }
+
   function pause() {
     clearInterval(timer);
     timer = null;
@@ -77,7 +135,8 @@
     for (const node of nodes) {
       const id = node.id;
       const visited = step.visited.includes(id);
-      const active = step.current === id && !visited;
+      // Noden er visited fra den vælges, men vises som current, indtil naboerne er undersøgt.
+      const active = step.current === id && step.phase !== 'settle';
       const onRoute = step.path.includes(id);
       const state = onRoute ? 'route' : active ? 'active' : visited ? 'visited' : step.distances[id] < Infinity ? 'discovered' : 'unknown';
       const { group, distance, role } = nodeElements.get(id);
@@ -107,16 +166,11 @@
       empty.className = 'empty'; empty.textContent = '∅';
       get('frontier').append(empty);
     }
-    const phases = { start: 'initialize', select: 'extract-min', inspect: 'compare', relax: 'relax', keep: 'no update', settle: 'visited', complete: 'done', unreachable: 'unreachable' };
-    if (DijkstraDemo.javaTrace) Object.assign(phases, {
-      start: 'queue.add()', select: 'queue.poll()',
-      relax: 'relax / queue.add()', skip: 'continue · visited',
-      'skip-neighbor': 'continue · nabo visited', settle: 'visited.add()'
-    });
+    const phases = { start: 'initialize', select: 'extract-min · visited', inspect: 'compare', relax: 'relax', keep: 'no update', settle: 'neighbors done', complete: 'done', unreachable: 'unreachable' };
+    renderCode(step, previousStep);
     get('phase').textContent = phases[step.phase];
     get('current-node').textContent = step.current ?? '—';
     get('current-edge').textContent = step.edge ? step.edge.replace('-', ' → ') : '—';
-    if (DijkstraDemo.javaTrace) renderQueue(step, previousStep);
     get('result').hidden = step.phase !== 'complete' && step.phase !== 'unreachable';
     get('result').textContent = step.phase === 'complete'
       ? `${step.path.join(' → ')} · ${step.distances[target.value]} km`
@@ -128,38 +182,6 @@
     get('next').disabled = index === steps.length - 1;
     get('play').disabled = index === steps.length - 1;
     if (index === steps.length - 1) pause();
-  }
-
-  function renderQueue(step, previousStep) {
-    get('current-distance').textContent = step.currentDistance ?? '—';
-    const body = get('priority-queue');
-    body.replaceChildren();
-    step.queue.forEach((entry, position) => {
-      const row = document.createElement('tr');
-      const inserted = index === 0 || !previousStep.queue.some(old => old.node === entry.node && old.distance === entry.distance);
-      row.className = inserted ? 'queue-added' : entry.stale || entry.visited ? 'queue-stale' : position === 0 ? 'queue-next' : '';
-      const status = [entry.visited ? 'visited' : '', entry.stale ? 'gammel' : ''].filter(Boolean).join(' · ') || 'kandidat';
-      for (const value of [position + 1, entry.node, entry.distance, status]) {
-        const cell = document.createElement('td');
-        cell.textContent = value;
-        row.append(cell);
-      }
-      body.append(row);
-    });
-    if (!step.queue.length) {
-      const row = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.colSpan = 4; cell.textContent = '∅'; row.append(cell); body.append(row);
-    }
-    get('queue-size').textContent = `size: ${step.queue.length}`;
-    let operation = '—';
-    if (step.phase === 'select' || step.phase === 'skip') {
-      operation = `${step.phase === 'select' ? 'poll() →' : 'skip →'} ${step.current}, ${step.currentDistance} km`;
-    } else if (step.phase === 'start' || step.phase === 'relax') {
-      const node = step.phase === 'start' ? source.value : step.edge.split('-')[1];
-      operation = `add(${node}, ${step.distances[node]})`;
-    }
-    get('queue-operation').textContent = operation;
   }
 
   function reset() {
@@ -183,7 +205,7 @@
     source.add(new Option(node.id, node.id));
     target.add(new Option(node.id, node.id));
   }
-  source.value = 'A'; target.value = 'H';
+  source.value = 'S'; target.value = 'M';
   source.addEventListener('change', reset);
   target.addEventListener('change', reset);
   get('reset').addEventListener('click', reset);
@@ -197,5 +219,5 @@
     setStepMode(steps[index].rawIndex);
   });
   get('graph-summary').textContent = `${nodes.length} byer · ${edges.length} rettede veje · km`;
-  drawGraph(); reset();
+  drawGraph(); drawCode(); reset();
 })();

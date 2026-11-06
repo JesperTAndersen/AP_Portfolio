@@ -42,42 +42,67 @@ test('alle start/mål-par stemmer med Floyd–Warshall', () => {
   }
 });
 
-test('standardeksemplet viser en forbedring og giver 15 km', () => {
-  const steps = createSteps('A', 'H');
-  const values = steps.filter(step => step.phase === 'relax' && step.edge.endsWith('-B'));
-  assert.deepEqual(values.map(step => step.distances.B), [8, 5]);
-  assert.deepEqual(steps.at(-1).path, ['A', 'C', 'B', 'D', 'E', 'F', 'H']);
-  assert.equal(steps.at(-1).distances.H, 15);
+test('standardeksemplet: fælde, blindgyde og korteste rute (10 km)', () => {
+  const steps = createSteps('S', 'M');
+  const result = steps.at(-1);
+  assert.deepEqual(result.path, ['S', 'F', 'G', 'H', 'M']);
+  assert.equal(result.distances.M, 10);
+  const order = steps.filter(step => step.phase === 'select').map(step => step.current);
+  assert.deepEqual(order, ['S', 'A', 'B', 'C', 'F', 'D', 'G', 'H', 'E', 'M']);
+  const updates = to => steps.filter(step => step.phase === 'relax' && step.edge.endsWith(`-${to}`))
+    .map(step => [step.edge, step.distances[to]]);
+  assert.deepEqual(updates('M'), [['C-M', 15], ['H-M', 10]]);
+  assert.deepEqual(updates('G'), [['S-G', 7], ['F-G', 6]]);
 });
 
-test('sidegrenen behandles før H, men indgår ikke i ruten', () => {
-  const steps = createSteps('A', 'H');
+test('blindgyden udforskes helt før målet, men indgår ikke i ruten', () => {
+  const steps = createSteps('S', 'M');
   const result = steps.at(-1);
-  assert.equal(result.distances.I, 4);
-  assert.equal(result.distances.J, 6);
-  for (const id of ['I', 'J']) {
-    assert.ok(steps.findIndex(step => step.phase === 'settle' && step.current === id)
-      < steps.findIndex(step => step.phase === 'select' && step.current === 'H'));
+  assert.equal(result.distances.D, 5);
+  assert.equal(result.distances.E, 9);
+  for (const id of ['D', 'E']) {
     assert.ok(result.visited.includes(id));
     assert.ok(!result.path.includes(id));
   }
-  assert.equal(createSteps('J', 'H').at(-1).phase, 'unreachable');
+  assert.equal(createSteps('E', 'M').at(-1).phase, 'unreachable');
+});
+
+test('en node er visited fra det øjeblik, den vælges', () => {
+  const steps = createSteps('S', 'M');
+  steps.forEach((step, i) => {
+    if (step.phase !== 'select') return;
+    assert.ok(!step.visited.includes(step.current));
+    assert.ok(steps[i + 1].visited.includes(step.current));
+  });
+});
+
+test('en naiv grådig "billigste næste kant"-vandring ender i fælden', () => {
+  let city = 'S', total = 0;
+  const walk = [city];
+  while (city !== 'M') {
+    const cheapest = edges.filter(edge => edge.from === city).sort((a, b) => a.weight - b.weight)[0];
+    total += cheapest.weight; city = cheapest.to; walk.push(city);
+  }
+  assert.deepEqual(walk, ['S', 'A', 'B', 'C', 'M']);
+  assert.equal(total, 15);
+  assert.ok(total > createSteps('S', 'M').at(-1).distances.M);
+  assert.equal(createSteps('M', 'S').at(-1).phase, 'unreachable');
 });
 
 test('tilstande er uafhængige, så tilbage og nulstil ikke ændrer historikken', () => {
-  const firstRun = createSteps('A', 'H');
-  const secondRun = createSteps('A', 'H');
+  const firstRun = createSteps('S', 'M');
+  const secondRun = createSteps('S', 'M');
   assert.equal(firstRun[0].distances.B, Infinity);
   assert.equal(firstRun[0].previous.B, null);
-  firstRun.at(-1).distances.A = 999;
+  firstRun.at(-1).distances.S = 999;
   firstRun.at(-1).visited.push('test');
-  assert.equal(firstRun[0].distances.A, 0);
+  assert.equal(firstRun[0].distances.S, 0);
   assert.deepEqual(firstRun[0].visited, []);
-  assert.equal(secondRun.at(-1).distances.A, 0);
+  assert.equal(secondRun.at(-1).distances.S, 0);
 });
 
 test('ukendte byer afvises', () => {
-  assert.throws(() => createSteps('X', 'H'), /Ukendt by/);
+  assert.throws(() => createSteps('X', 'M'), /Ukendt by/);
 });
 
 test('visningen springer sammenligninger over og bevarer alle slutresultater', () => {
@@ -90,7 +115,6 @@ test('visningen springer sammenligninger over og bevarer alle slutresultater', (
     assert.deepEqual(compact[0], detailed[0]);
     assert.ok(!compact.some(step => ['inspect', 'keep'].includes(step.phase)));
   }
-  const compact = selectSteps(createSteps('A', 'H'));
-  assert.ok(!compact.some(step => step.edge === 'B-E'));
+  const compact = selectSteps(createSteps('S', 'M'));
   assert.ok(compact.some(step => step.phase === 'settle' && step.current === 'B' && step.visited.includes('B')));
 });

@@ -1,19 +1,18 @@
 package app.dijkstra;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class Dijkstra
 {
     public static void main(String[] args)
     {
         Map<String, WeightedNode> cities = createGraph();
-        findShortestPath(cities.get("A"), cities.get("H"));
+        findShortestPath(cities.get("S"), cities.get("M"));
     }
 
     public static Map<String, WeightedNode> createGraph()
     {
-        // Her bygges noderne.
+        WeightedNode S = new WeightedNode("S");
         WeightedNode A = new WeightedNode("A");
         WeightedNode B = new WeightedNode("B");
         WeightedNode C = new WeightedNode("C");
@@ -22,43 +21,36 @@ public class Dijkstra
         WeightedNode F = new WeightedNode("F");
         WeightedNode G = new WeightedNode("G");
         WeightedNode H = new WeightedNode("H");
-        WeightedNode I = new WeightedNode("I");
-        WeightedNode J = new WeightedNode("J");
+        WeightedNode M = new WeightedNode("M");
 
-        // Rettede veje med vægte i km.
-        A.addNeighbor(B, 8);
-        A.addNeighbor(C, 2);
+        // Øverste rute – fælden: de lokalt billigste kanter, men C → M koster 12. I alt 15 km.
+        S.addNeighbor(A, 1);
+        A.addNeighbor(B, 1);
+        B.addNeighbor(C, 1);
+        C.addNeighbor(M, 12);
 
-        B.addNeighbor(D, 2);
-        B.addNeighbor(E, 6);
+        // Midterste rute – blindgyde: udforskes helt, fordi den er tættere på S end M er.
+        S.addNeighbor(D, 5);
+        D.addNeighbor(E, 4);
 
-        C.addNeighbor(B, 3);
-        C.addNeighbor(E, 9);
-        C.addNeighbor(I, 2);
+        // Nederste rute – starter dyrere (S → F = 4), men er den korteste vej: 10 km.
+        S.addNeighbor(F, 4);
+        F.addNeighbor(G, 2);
+        G.addNeighbor(H, 2);
+        H.addNeighbor(M, 2);
 
-        D.addNeighbor(E, 1);
-        D.addNeighbor(F, 6);
+        // Direkte vej: giver G en foreløbig afstand på 7, som senere forbedres til 6 via F.
+        S.addNeighbor(G, 7);
 
-        E.addNeighbor(F, 3);
-        E.addNeighbor(G, 5);
-
-        F.addNeighbor(H, 4);
-        G.addNeighbor(H, 3);
-
-        // Sidegren: kan nås fra A, men fører ikke videre til H.
-        I.addNeighbor(J, 2);
-
-        // Mappet bruges til at vælge start/mål og dele grafen med visualiseringen.
         Map<String, WeightedNode> cities = new LinkedHashMap<>();
-        for (WeightedNode node : List.of(A, B, C, D, E, F, G, H, I, J))
+        for (WeightedNode node : List.of(S, A, B, C, D, E, F, G, H, M))
         {
             cities.put(node.getName(), node);
         }
-
         return cities;
     }
 
-    // Pakker en node og dens afstand sammen, så prioritetskøen kan sortere.
+    // Gemmer afstanden på indsættelsestidspunktet, så PriorityQueue kan sortere efter den.
     static class NodeWithDist implements Comparable<NodeWithDist>
     {
         WeightedNode node;
@@ -79,95 +71,66 @@ public class Dijkstra
 
     public static void findShortestPath(WeightedNode source, WeightedNode destination)
     {
-        findShortestPath(source, destination, null);
-    }
-
-    // Observatøren gemmer kun øjebliksbilleder; samme algoritme bruges uden visualisering.
-    public static void findShortestPath(WeightedNode source, WeightedNode destination,
-                                        Consumer<DijkstraTrace.Step> observer)
-    {
-        // Bedste kendte afstand fra start til hver node.
-        Map<WeightedNode, Integer> dist = new HashMap<>();
-
-        // Forgængeren bruges til at rekonstruere vejen til sidst.
+        Map<WeightedNode, Integer> distances = new HashMap<>();
         Map<WeightedNode, WeightedNode> prev = new HashMap<>();
-
-        // Noder med endelig afstand, som ikke skal behandles igen.
         Set<WeightedNode> visited = new HashSet<>();
-
-        // Køen sorterer selv ved hjælp af NodeWithDist.compareTo.
         PriorityQueue<NodeWithDist> queue = new PriorityQueue<>();
 
-        // trace.save gemmer kun trin til visualiseringen.
-        DijkstraTrace trace = new DijkstraTrace(dist, prev, visited, queue, observer);
-
-        // Startnoden er 0 væk fra sig selv.
-        dist.put(source, 0);
+        distances.put(source, 0);
         queue.add(new NodeWithDist(source, 0));
-        trace.save("start", null, null);
 
         while (!queue.isEmpty())
         {
+            // Grådigt valg: lavest SAMLET afstand fra start, ikke den billigste næste kant.
             NodeWithDist current = queue.poll();
-            trace.save("select", current, null);
 
-            // Et gammelt køelement springes over, hvis noden allerede er visited.
             if (visited.contains(current.node))
             {
-                trace.save("skip", current, null);
                 continue;
             }
-            // Når målet vælges fra køen, er dets korteste afstand fundet.
+            visited.add(current.node);
+
+            // Først når målet vælges fra køen, er afstanden endelig – ikke når det opdages.
             if (current.node.equals(destination))
             {
-                visited.add(current.node);
                 break;
             }
 
-            // Undersøg hver udgående kant.
             for (Map.Entry<WeightedNode, Integer> entry : current.node.getNeighbors().entrySet())
             {
                 WeightedNode next = entry.getKey();
                 int weight = entry.getValue();
                 if (visited.contains(next))
                 {
-                    trace.save("skip-neighbor", current, next);
                     continue;
                 }
-                // Samlet afstand til naboen via current.
                 int newDist = current.dist + weight;
-                trace.save("inspect", current, next);
 
-                // Opdater kun, hvis vi har fundet en kortere vej.
-                // Det gamle køelement bliver liggende og springes over senere.
-                if (newDist < dist.getOrDefault(next, Integer.MAX_VALUE))
+                // PriorityQueue kan ikke ændre en prioritet, så vi tilføjer en ny post;
+                // den gamle springes over, når den tages ud.
+                if (newDist < distances.getOrDefault(next, Integer.MAX_VALUE))
                 {
-                    dist.put(next, newDist);
+                    distances.put(next, newDist);
                     prev.put(next, current.node);
                     queue.add(new NodeWithDist(next, newDist));
-                    trace.save("relax", current, next);
-                }
-                else
-                {
-                    trace.save("keep", current, next);
                 }
             }
-            // Noden er nu færdigbehandlet og bliver grøn i samme trin.
-            visited.add(current.node);
-            trace.save("settle", current, null);
         }
 
         if (!visited.contains(destination))
         {
-            trace.save("unreachable", null, null);
-            if (observer == null)
-            {
-                System.out.println("Ingen vej fra " + source.getName() + " til " + destination.getName());
-            }
+            System.out.println("Ingen vej fra " + source.getName() + " til " + destination.getName());
             return;
         }
 
-        // Rekonstruer stien ved at følge prev fra mål tilbage til start.
+        List<String> path = buildPath(prev, destination);
+        System.out.println("Korteste vej: " + String.join(" → ", path));
+        System.out.println("Samlet dist: " + distances.get(destination) + " km");
+    }
+
+    // prev peger baglæns, så vi går fra mål til start og indsætter forrest.
+    private static List<String> buildPath(Map<WeightedNode, WeightedNode> prev, WeightedNode destination)
+    {
         List<String> path = new ArrayList<>();
         WeightedNode step = destination;
         while (step != null)
@@ -175,11 +138,6 @@ public class Dijkstra
             path.add(0, step.getName());
             step = prev.get(step);
         }
-        trace.saveComplete(new NodeWithDist(destination, dist.get(destination)), path);
-        if (observer == null)
-        {
-            System.out.println("Korteste vej: " + path);
-            System.out.println("Samlet dist: " + dist.get(destination) + " km");
-        }
+        return path;
     }
 }

@@ -13,7 +13,6 @@
   <main>
     <header class="page-header">
       <div><p class="eyebrow">AP PORTFOLIO / GRAFER</p><h1>Dijkstra<span>.</span></h1></div>
-      <nav class="versions" aria-label="Version"><a href="index.html" aria-current="page">JavaScript</a><a href="java.html">Java + PriorityQueue</a></nav>
     </header>
 
     <section class="toolbar" aria-label="Indstillinger og afspilning">
@@ -33,11 +32,12 @@
     </section>
 
     <div class="workspace">
+      <div class="main-column">
       <section class="panel graph-panel" aria-labelledby="graph-title">
-        <div class="panel-heading"><h2 id="graph-title">Vejnettet</h2><span id="graph-summary">10 byer · 14 rettede veje · km</span></div>
+        <div class="panel-heading"><h2 id="graph-title">Vejnettet</h2><span id="graph-summary">10 byer · 11 rettede veje · km</span></div>
         <div class="graph-viewport" tabindex="0" role="region" aria-label="Vejnet; rul vandret på små skærme">
         <svg id="graph" viewBox="0 0 920 620" role="img" aria-labelledby="svg-title svg-description">
-          <title id="svg-title">Rettet graf med byerne A til J</title>
+          <title id="svg-title">Rettet graf fra startbyen S til målbyen M via byerne A til H</title>
           <desc id="svg-description">Pilene viser tilladt kørselsretning. Tallene på vejene er afstande i kilometer. Aktuelle afstande og status findes også i tabellen.</desc>
         </svg>
         </div>
@@ -55,9 +55,16 @@
         <div class="timeline"><label for="timeline" id="step-count">Trin</label><input id="timeline" type="range" min="0" value="0" aria-label="Vælg trin"></div>
       </section>
 
+      <section class="panel code-panel" aria-labelledby="code-title">
+        <div class="panel-heading"><h2 id="code-title">Koden</h2><span>fra Dijkstra.java · let forkortet</span></div>
+        <ol id="code" class="code"></ol>
+        <p id="explanation" class="explanation" aria-live="polite"></p>
+      </section>
+      </div>
+
       <aside class="sidebar">
         <section class="panel" aria-labelledby="distances-title">
-          <div class="panel-heading"><h2 id="distances-title">Node state</h2><span>source: <b id="source-label">A</b> · km</span></div>
+          <div class="panel-heading"><h2 id="distances-title">Node state</h2><span>source: <b id="source-label">S</b> · km</span></div>
           <table><thead><tr><th scope="col">Node</th><th scope="col">Distance</th><th scope="col">Previous</th><th scope="col">Status</th></tr></thead><tbody id="distances"></tbody></table>
         </section>
         <section class="panel frontier-panel" aria-labelledby="frontier-title">

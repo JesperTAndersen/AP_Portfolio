@@ -13,19 +13,6 @@ main { max-width: 1600px; margin: auto; padding: 36px 32px 24px; }
 h1 { font-size: clamp(30px, 4vw, 48px); letter-spacing: -2px; margin: 0; line-height: 1.15; font-weight: 650; }
 h1 span { color: #64a36b; }
 .chapter { border: 1px solid var(--line); padding: 12px 16px; white-space: nowrap; }
-.versions { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; }
-.versions a { color: var(--green); text-decoration: none; border: 1px solid var(--line); padding: 11px 14px; border-radius: 6px; }
-.versions a[aria-current] { background: var(--green); color: white; }
-.queue-panel { border-top: 1px solid var(--line); }
-.queue-panel table { font-size: 17px; }
-.queue-panel th, .queue-panel td { padding: 12px 20px; }
-.queue-added { background: #e1eedc; }
-.queue-stale { background: #f3eee6; }
-.queue-stale td:nth-child(3) { text-decoration: line-through; color: #8b7967; }
-.queue-next { background: #fcf0d5; }
-.queue-operation { padding: 14px 22px; margin: 0; color: var(--green); font: 15px Consolas, monospace; border-top: 1px solid var(--line); }
-.missing-data { border: 1px solid var(--line); border-radius: 8px; padding: 22px; line-height: 1.7; }
-.missing-data code { display: block; overflow-wrap: anywhere; }
 .toolbar { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 24px; }
 .route-inputs, .playback { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 label { font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -74,7 +61,14 @@ h2 { font-size: 15px; font-weight: 650; margin: 0; }
 .timeline { display: flex; align-items: center; gap: 20px; padding: 18px 24px; }
 .timeline label { white-space: nowrap; font-variant-numeric: tabular-nums; }
 input[type="range"] { flex: 1; min-width: 0; accent-color: var(--green); cursor: pointer; }
-.sidebar { display: grid; gap: 20px; }
+.sidebar, .main-column { display: grid; gap: 20px; }
+.code { list-style: none; margin: 0; padding: 0 0 12px; font: 14px/1.5 Consolas, "Cascadia Mono", monospace; overflow-x: auto; }
+.code li { display: flex; gap: 18px; padding: 2px 22px; white-space: pre; color: #3d5048; border-left: 4px solid transparent; }
+.code li.is-current { background: #fcf0d5; border-left-color: #b67922; color: #20352f; font-weight: 700; }
+.code li.java-only { color: #9aa79d; }
+.code .note { color: #986216; font-weight: 600; }
+.code li.java-only .note { color: #9aa79d; font-weight: 400; }
+.explanation { margin: 0; padding: 16px 22px; border-top: 1px solid var(--line); background: #eef2e8; font-size: 14px; line-height: 1.5; min-height: 54px; }
 table { width: 100%; border-collapse: collapse; font-size: 20px; font-variant-numeric: tabular-nums; }
 th { font-size: 12px; color: var(--muted); font-weight: 600; }
 th, td { padding: 17px 20px; text-align: left; border-bottom: 1px solid #edf0e8; }
