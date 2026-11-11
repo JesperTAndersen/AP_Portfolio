@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A* · Korteste vej i et grid</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="astar.js" defer></script>
+  <script src="playback.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">AP PORTFOLIO / GRAFER</p><h1>A*<span>.</span></h1></div>
+    </header>
+
+    <section class="toolbar" aria-label="Indstillinger og afspilning">
+      <div class="route-inputs">
+        <label>Fra<select id="source" aria-label="Startby"></select></label>
+        <span class="route-arrow" aria-hidden="true">→</span>
+        <label>Til<select id="target" aria-label="Målby"></select></label>
+        <label class="heuristic-input">Heuristik<select id="heuristic" aria-label="Heuristik"></select></label>
+      </div>
+      <div class="playback">
+        <button id="reset" title="Tilbage til start">Nulstil</button>
+        <button id="back">← Tilbage</button>
+        <button id="next">Næste trin →</button>
+        <button id="play" class="primary">Afspil</button>
+        <label class="speed">Tempo<select id="speed"><option value="1500">Langsomt</option><option value="800" selected>Normalt</option><option value="350">Hurtigt</option><option value="120">Meget hurtigt</option></select></label>
+        <label class="detail-toggle"><input id="show-all-steps" type="checkbox">Alle kode-trin</label>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <div class="main-column">
+      <section class="panel graph-panel" aria-labelledby="graph-title">
+        <div class="panel-heading"><h2 id="graph-title">Labyrinten</h2><span id="graph-summary"></span></div>
+        <div class="graph-viewport" tabindex="0" role="region" aria-label="Grid; rul vandret på små skærme">
+        <svg id="graph" role="img" aria-labelledby="svg-title svg-description">
+          <title id="svg-title">Labyrint på 11 × 11 felter med mure, veje og fire byer</title>
+          <desc id="svg-description">Mørke felter er mure. Rækkenumre står til venstre og kolonnenumre øverst. I hvert fundet felt står f = g + h i midten. Ved det aktuelle felt og dets naboer står g øverst til venstre og h øverst til højre. Pilen peger på forgængeren.</desc>
+        </svg>
+        </div>
+        <div class="legend" aria-label="Farveforklaring">
+          <span><i class="dot unknown"></i>unknown</span><span><i class="dot discovered"></i>i køen</span>
+          <span><i class="dot active"></i>current</span><span><i class="dot visited"></i>visited</span>
+          <span><i class="dot route"></i>shortest path</span><span><i class="dot wall"></i>mur</span><span><i class="dot only-dijkstra"></i>kun Dijkstra (vises til sidst)</span>
+          <span class="cell-key">Midten: <b>f</b> = g + h · hjørner ved current og naboer: <b>g</b> fra start, <b>h</b> skøn til mål · <b>↑</b> forgænger</span>
+        </div>
+        <div class="step-state" aria-live="polite" aria-atomic="true">
+          <span id="phase" class="phase"></span>
+          <span>current <strong id="current-node">—</strong></span>
+          <span>f = g + h <strong id="current-cost">—</strong></span>
+          <span>udforsket <strong id="explored">0</strong></span>
+          <span>f-niveau <strong id="f-levels">—</strong></span>
+          <span>skøn <strong id="h-formula">—</strong></span>
+          <p id="result" hidden></p>
+        </div>
+        <div class="timeline"><label for="timeline" id="step-count">Trin</label><input id="timeline" type="range" min="0" value="0" aria-label="Vælg trin"></div>
+      </section>
+
+      <section class="panel code-panel" aria-labelledby="code-title">
+        <div class="panel-heading"><h2 id="code-title">Koden</h2><span>fra MazeSolver.java · let forkortet</span></div>
+        <ol id="code" class="code"></ol>
+        <p id="explanation" class="explanation" aria-live="polite"></p>
+      </section>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel" aria-labelledby="queue-title">
+          <div class="panel-heading"><h2 id="queue-title">Køen</h2><span>sorteret som compareTo(): f, h, række, kolonne</span></div>
+          <table><thead><tr><th scope="col">Felt</th><th scope="col">g</th><th scope="col">h</th><th scope="col">f</th><th scope="col"></th></tr></thead><tbody id="queue"></tbody></table>
+          <p id="queue-more" class="queue-more" hidden></p>
+        </section>
+        <section class="panel" aria-labelledby="compare-title">
+          <div class="panel-heading"><h2 id="compare-title">A* mod Dijkstra</h2><span id="compare-route"></span></div>
+          <table><thead><tr><th scope="col">Heuristik</th><th scope="col">Udforsket</th><th scope="col">Skridt</th></tr></thead><tbody id="compare"></tbody></table>
+          <p class="compare-note">Samme kode, kun heuristikken er skiftet. Med h = 0 bestemmer g alene rækkefølgen, og A* bliver til Dijkstra: den søger lige meget i alle retninger. Manhattan trækker søgningen mod målet. Skift heuristik øverst for at afspille begge på samme grid.</p>
+          <p id="compare-diff" class="compare-diff"></p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
