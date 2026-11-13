@@ -1,4 +1,4 @@
-package app.dijkstra;
+package app.graphs.dijkstra;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

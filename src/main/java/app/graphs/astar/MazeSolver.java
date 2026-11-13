@@ -1,4 +1,4 @@
-package app.astar;
+package app.graphs.astar;
 
 import java.util.*;
 
