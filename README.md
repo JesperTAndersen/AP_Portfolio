@@ -6,4 +6,5 @@ Java-kode i `src/main/java/app/`, visualiseringer i `visualiseringer/`
 | Opgave | Indhold |
 | --- | --- |
 | Dijkstra | [Java](src/main/java/app/graphs/dijkstra/Dijkstra.java) · [Visualisering (JavaScript)](visualiseringer/dijkstra/index.html) · [Opgavebeskrivelse](docs/portfolio_exercises/graphs/shortestpath.md) |
-| A* | [Java](src/main/java/app/astar/MazeSolver.java) · [Visualisering (JavaScript)](visualiseringer/astar/index.html) · [Opgavebeskrivelse](docs/portfolio_exercises/graphs/shortestpath.md) |
+| A* | [Java](src/main/java/app/graphs/astar/MazeSolver.java) · [Visualisering (JavaScript)](visualiseringer/astar/index.html) · [Opgavebeskrivelse](docs/portfolio_exercises/graphs/shortestpath.md) |
+| Kompleksitet og datastrukturer | [Java](src/main/java/app/complexity/Complexity.java) · [Svar](src/main/java/app/complexity/README.md) · [Opgavebeskrivelse](docs/portfolio_exercises/complexity/complexity_and_datastructures.md) |
