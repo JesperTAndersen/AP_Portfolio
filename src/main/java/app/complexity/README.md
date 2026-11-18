@@ -119,22 +119,7 @@ Sæt 5, 1, 4, 2, 3 ind og tag ud igen:
 enderne er i arrayet (head og tail index), så det rigtige element står klar uden at den skal
 sammenligne eller lede efter noget. Derfor O(1).
 
-**Kø eller stak bestemmes af typen.** `ArrayDeque` implementerer interfacet `Deque` (udtales
-"deck", *double-ended queue*), som arver fra `Queue`:
-
-```
-Queue        offer, poll, peek                    (kun FIFO)
-  └─ Deque   + push, pop, offerFirst, pollLast …  (begge ender)
-       └─ ArrayDeque                              (implementeringen: et array)
-```
-
-Den type variablen er erklæret som, bestemmer hvilke metoder man må kalde, ligesom
-`List<Integer> list = new ArrayList<>()`. I koden:
-
-- `Queue<Integer> queue = new ArrayDeque<>()` kan kun bruges som kø: `push` giver compile-fejl.
-- `Deque<Integer> stack = new ArrayDeque<>()` bruges som stak med `push`/`pop`. Java har intet
-  rent stak-interface (den gamle klasse `Stack` er forældet og arver fra `Vector`), så man skal
-  selv holde sig til `push`/`pop`, for `Deque` tillader også `offer`/`poll`.
+**Kø eller stak bestemmes af typen.** `ArrayDeque` implementerer interfacet `Deque` ("deck", *double-ended queue*), som arver fra `Queue`:
 
 PriorityQueue implementerer også `Queue`, så den bruger de samme metoder (`offer`/`poll`). Kun
 *hvilket* element `poll` giver, er forskelligt.
