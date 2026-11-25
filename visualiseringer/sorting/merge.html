@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Merge Sort · Sortering</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="products.js" defer></script>
+  <script src="merge.js" defer></script>
+  <script src="merge-app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">AP PORTFOLIO / SORTERING</p><h1>Merge Sort<span>.</span></h1></div>
+      <nav class="algo-nav" aria-label="Algoritmer"><a href="bubble.html">Bubble</a><a href="merge.html" aria-current="page">Merge</a><a href="quick.html">Quick</a><a href="heap.html">Heap</a></nav>
+    </header>
+
+    <section class="toolbar" aria-label="Indstillinger og afspilning">
+      <div class="settings">
+        <label>Input<select id="dataset" aria-label="Datasæt"></select></label>
+        <label>Vis<select id="mode" aria-label="Detaljeniveau">
+          <option value="all" selected>Hver sammenligning</option>
+          <option value="overview">Kun kald og fletninger</option>
+        </select></label>
+      </div>
+      <div class="playback">
+        <button id="reset" title="Tilbage til start">Nulstil</button>
+        <button id="back">← Tilbage</button>
+        <button id="next">Næste trin →</button>
+        <button id="play" class="primary">Afspil</button>
+        <label class="speed">Tempo<select id="speed"><option value="1600">Langsomt</option><option value="900" selected>Normalt</option><option value="400">Hurtigt</option><option value="150">Meget hurtigt</option></select></label>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <div class="main-column">
+        <section class="panel" aria-labelledby="bars-title">
+          <div class="panel-heading"><h2 id="bars-title">Varerne</h2><span>højde = pris i kr · tom plads = varen ligger i left/right under fletning</span></div>
+          <div class="bars-area">
+            <div id="bars" class="bars" role="img" aria-label="Varerne som søjler i deres nuværende rækkefølge"></div>
+            <div id="indexes" class="indexes" aria-hidden="true"></div>
+            <div id="range" class="range-row" aria-hidden="true"></div>
+          </div>
+          <div class="legend" aria-label="Farveforklaring">
+            <span><i class="swatch left-half"></i>left</span>
+            <span><i class="swatch right-half"></i>right</span>
+            <span><i class="swatch merged"></i>flettet ind i result</span>
+            <span><i class="swatch sorted-part"></i>sorteret del</span>
+            <span><i class="swatch final"></i>færdig</span>
+            <span><i class="rank-sample">1</i><i class="rank-sample">2</i>rækkefølge blandt varer med samme pris i input</span>
+          </div>
+          <div class="step-state" aria-live="polite" aria-atomic="true">
+            <span id="phase" class="phase"></span>
+            <span>kald <strong id="call">—</strong></span>
+            <span>dybde <strong id="depth">0</strong></span>
+            <span>sammenligninger <strong id="comparisons">0</strong></span>
+            <p id="result" hidden></p>
+          </div>
+          <p id="explanation" class="explanation" aria-live="polite"></p>
+          <div class="timeline"><label for="timeline" id="step-count">Trin</label><input id="timeline" type="range" min="0" value="0" aria-label="Vælg trin"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="tree-title">
+          <div class="panel-heading"><h2 id="tree-title">Opdelingen</h2><span>hver blok er ét kald af mergeSort · står under sine varer</span></div>
+          <div class="tree-area"><div id="tree" class="tree" role="img" aria-label="Opdelingstræet: hvilke kald der er færdige, kører eller venter"></div></div>
+          <div class="legend" aria-label="Forklaring til træet">
+            <span><i class="swatch node-idle"></i>ikke kaldt endnu</span>
+            <span><i class="swatch node-stack"></i>venter på et kald under sig</span>
+            <span><i class="swatch node-current"></i>kører nu</span>
+            <span><i class="swatch node-done"></i>sorteret og returneret</span>
+          </div>
+        </section>
+
+        <section class="panel code-panel" aria-labelledby="code-title">
+          <div class="panel-heading"><h2 id="code-title">Koden</h2><span>fra MergeSort.java · let forkortet (uden { })</span></div>
+          <ol id="code" class="code"></ol>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel" aria-labelledby="merge-title">
+          <div class="panel-heading"><h2 id="merge-title">Fletning</h2><span>sammenlign kun de to forreste</span></div>
+          <div id="merge" class="merge-view"></div>
+        </section>
+        <section class="panel" aria-labelledby="stack-title">
+          <div class="panel-heading"><h2 id="stack-title">Kaldstak</h2><span>øverst = kører nu · resten venter</span></div>
+          <ol id="stack" class="stack"></ol>
+        </section>
+        <section class="panel" aria-labelledby="stability-title">
+          <div class="panel-heading"><h2 id="stability-title">Stabilitet</h2><span>samme pris: står de stadig i input-rækkefølge?</span></div>
+          <ul id="stability" class="stability"></ul>
+        </section>
+        <section class="panel" aria-labelledby="cases-title">
+          <div class="panel-heading"><h2 id="cases-title">Best og worst case</h2><span>altid O(n log n), men færre sammenligninger når den ene side tømmes tidligt</span></div>
+          <table><thead><tr><th scope="col">Input</th><th scope="col">Sammenligninger</th><th scope="col"></th></tr></thead><tbody id="cases"></tbody></table>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

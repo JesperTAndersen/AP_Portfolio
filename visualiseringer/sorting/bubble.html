@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bubble Sort · Sortering</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="products.js" defer></script>
+  <script src="bubble.js" defer></script>
+  <script src="bubble-app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">AP PORTFOLIO / SORTERING</p><h1>Bubble Sort<span>.</span></h1></div>
+      <nav class="algo-nav" aria-label="Algoritmer"><a href="bubble.html" aria-current="page">Bubble</a><a href="merge.html">Merge</a><a href="quick.html">Quick</a><a href="heap.html">Heap</a></nav>
+    </header>
+
+    <section class="toolbar" aria-label="Indstillinger og afspilning">
+      <div class="settings">
+        <label>Input<select id="dataset" aria-label="Datasæt"></select></label>
+        <label>Vis<select id="mode" aria-label="Detaljeniveau">
+          <option value="all" selected>Hver sammenligning</option>
+          <option value="passes">Kun gennemløb</option>
+        </select></label>
+      </div>
+      <div class="playback">
+        <button id="reset" title="Tilbage til start">Nulstil</button>
+        <button id="back">← Tilbage</button>
+        <button id="next">Næste trin →</button>
+        <button id="play" class="primary">Afspil</button>
+        <label class="speed">Tempo<select id="speed"><option value="1600">Langsomt</option><option value="900" selected>Normalt</option><option value="400">Hurtigt</option><option value="150">Meget hurtigt</option></select></label>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <div class="main-column">
+        <section class="panel" aria-labelledby="bars-title">
+          <div class="panel-heading"><h2 id="bars-title">Varerne</h2><span>højde = pris i kr · sorteres stigende</span></div>
+          <div class="bars-area">
+            <div id="bars" class="bars" role="img" aria-label="Varerne som søjler i deres nuværende rækkefølge"></div>
+            <div id="indexes" class="indexes" aria-hidden="true"></div>
+            <div id="pointers" class="pointers" aria-hidden="true"></div>
+          </div>
+          <div class="legend" aria-label="Farveforklaring">
+            <span><i class="swatch compare"></i>sammenlignes (j, j + 1)</span>
+            <span><i class="swatch swap"></i>byttet</span>
+            <span><i class="swatch final"></i>endelig plads</span>
+            <span><i class="rank-sample">1</i><i class="rank-sample">2</i>rækkefølge blandt varer med samme pris i input</span>
+          </div>
+          <div class="step-state" aria-live="polite" aria-atomic="true">
+            <span id="phase" class="phase"></span>
+            <span>gennemløb <strong id="pass">—</strong></span>
+            <span>j <strong id="j">—</strong></span>
+            <span>swapped <strong id="swapped">—</strong></span>
+            <span>sammenligninger <strong id="comparisons">0</strong></span>
+            <span>ombytninger <strong id="swaps">0</strong></span>
+            <p id="result" hidden></p>
+          </div>
+          <p id="explanation" class="explanation" aria-live="polite"></p>
+          <div class="timeline"><label for="timeline" id="step-count">Trin</label><input id="timeline" type="range" min="0" value="0" aria-label="Vælg trin"></div>
+        </section>
+
+        <section class="panel code-panel" aria-labelledby="code-title">
+          <div class="panel-heading"><h2 id="code-title">Koden</h2><span>fra BubbleSort.java</span></div>
+          <ol id="code" class="code"></ol>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel" aria-labelledby="passes-title">
+          <div class="panel-heading"><h2 id="passes-title">Gennemløb</h2><span>én række pr. omgang i den ydre løkke</span></div>
+          <table><thead><tr><th scope="col">#</th><th scope="col">Sammenligninger</th><th scope="col">Ombytninger</th><th scope="col">Nu på plads</th></tr></thead><tbody id="passes"></tbody></table>
+        </section>
+        <section class="panel" aria-labelledby="stability-title">
+          <div class="panel-heading"><h2 id="stability-title">Stabilitet</h2><span>samme pris: står de stadig i input-rækkefølge?</span></div>
+          <ul id="stability" class="stability"></ul>
+        </section>
+        <section class="panel" aria-labelledby="cases-title">
+          <div class="panel-heading"><h2 id="cases-title">Best og worst case</h2><span>samme 10 varer, tre rækkefølger</span></div>
+          <table><thead><tr><th scope="col">Input</th><th scope="col">Sammenligninger</th><th scope="col">Ombytninger</th><th scope="col"></th></tr></thead><tbody id="cases"></tbody></table>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
